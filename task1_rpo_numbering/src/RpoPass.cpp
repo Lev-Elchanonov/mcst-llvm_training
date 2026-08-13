@@ -170,7 +170,7 @@ getRpoPassPluginInfo( void)
     };
 
     return (info);
-} /* getMyPassPluginInfo */
+}
 
 /**
  * Интерфейс, который гарантирует, что "opt" распознаст наш проход. 
