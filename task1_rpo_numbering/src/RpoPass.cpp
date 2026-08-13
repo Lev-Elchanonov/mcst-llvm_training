@@ -152,7 +152,7 @@ void
 CallBackForPassBuilder( PassBuilder &PB)
 {
     PB.registerPipelineParsingCallback( &CallBackForPipelineParser);
-} /* CallBackForPassBuider */
+}
 
 PassPluginLibraryInfo 
 getRpoPassPluginInfo( void)
