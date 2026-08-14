@@ -1,3 +1,2 @@
-task1_rpo_numbering/build/
-task1_rpo_numbering/cmake-build-debug
-
+*/build
+*/cmake-build-debug

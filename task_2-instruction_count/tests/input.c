@@ -1,0 +1,50 @@
+//=============================================================================
+// FILE:
+//      input.c
+//
+// DESCRIPTION:
+//      Sample input file
+//
+// License: MIT
+//=============================================================================
+int
+foo(int a) {
+    int b = a + a;
+    int c = b - a;
+    int d = a + c;
+    return d;
+}
+
+int
+bar(int a, int b) {
+    return (a + foo(b) * 2);
+}
+
+int
+fez(int a, int b, int c) {
+    return (a + bar(a, b) * 2 + c * 3);
+}
+
+int loop(int a){
+    int res = 0;
+    for (int i = 0; i < a; i++){
+        res = a * a;
+    }
+    return res;
+}
+int
+main(int argc, char *argv[]) {
+    int a = 123;
+    int ret = 0;
+
+
+    if (a > 100)
+        ret += bar(a, ret);
+    else
+        ret += fez(a, ret, 123);
+
+    for (int i = 0; i < a; i++){
+        ret = a * a;
+    }
+    return ret;
+}
