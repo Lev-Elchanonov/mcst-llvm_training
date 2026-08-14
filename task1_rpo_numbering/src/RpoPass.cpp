@@ -50,16 +50,7 @@ public:
     std::vector<std::string>& get_loops() { return loops_; }
 };
 
-void
-VisitFunction( Function &Func)
-{
-    /* LLVM использует кастомные потоки вывода. 
-     * llvm::errs() (поток ошибок), 
-     * llvm::outs() (аналогичен стандартному stdout), 
-     * llvm::nulls() (отбрасывает весь вывод) */
-    if (Func.empty()){
-        return;
-    }
+void VisitFunction(Function &Func) {
     outs() << "Visiting function: " << Func.getName() << "\n";
 
     std::map<BasicBlock*, size_t> BBMap;
@@ -87,76 +78,30 @@ VisitFunction( Function &Func)
 }
 
 
-struct RpoPass : PassInfoMixin<RpoPass>
-{
-    /* PreservedAnalyses - множество анализов, которые сохраняются после данного прохода,
-     * чтобы не запускать их заново.
-     *
-     * run() непосредственно нужен для запуска прохода.
-     *
-     * Так как мы просто хотим вывести: "имя функции - количество аргументов", то мы 
-     * возвращаем all(), что говорит о том, что ни один анализ не будет испорчен */
-    PreservedAnalyses 
-    run(Function &Function,
-        FunctionAnalysisManager &AnalysisManager)
-    {
+struct RpoPass : PassInfoMixin<RpoPass>{
+    PreservedAnalyses run(Function &Function, FunctionAnalysisManager &AnalysisManager){
         VisitFunction( Function);
         return (PreservedAnalyses::all());
     }
-
-    /* По умолчанию данный проход будет пропущен, если функция помечена атрибутом 
-     * optnone (не производить оптимизаций над ней). Поэтому необходимо вернуть true, 
-     * чтобы мы могли обходить и их. 
-     * (в режиме сборки -O0 все функции помечены как неоптимизируемые) */
-    static bool 
-    isRequired( void) 
-    { 
+    static bool isRequired() {
         return (true); 
     }
 };
-} /* namespace */
+}
 
-/**
- * Наш проход будет реализован в виде отдельно подключаемого плагина (расширения языка).
- * Это удобный способ расширить возможности компилятора. Например, сделать поддержку
- * своей прагмы, своей оптимизации, выдачи своего предупреждения.
- *
- * PassPluginLibraryInfo - структура, задающая базовые параметры для нашего плагина.
- * Её надо составить из:
- * - Версии API (для отслеживания совместимости ABI можно 
- *   использовать LLVM_PLUGIN_API_VERSION)
- * - Имя плагина
- * - Версии плагина
- * - Callback для регистрации плагина через PassBuilder
- */
-/**
- * По-модному это делают с помощью лямбда-функции, но можно и по-старинке.
- */
-bool
-CallBackForPipelineParser(
-    StringRef Name,
-    FunctionPassManager &FPM,  
-    ArrayRef<PassBuilder::PipelineElement>)
-{
-    if ( Name == "RpoPass" )
-    {
+bool CallBackForPipelineParser(StringRef Name, FunctionPassManager &FPM, ArrayRef<PassBuilder::PipelineElement>){
+    if ( Name == "RpoPass" ){
         FPM.addPass( RpoPass());
-	return (true);
-    } else
-    {
+	    return (true);
+    } else {
         return (false);
     }
-} /* CallBackForPipelineParser */
-
-void
-CallBackForPassBuilder( PassBuilder &PB)
-{
+}
+void CallBackForPassBuilder(PassBuilder &PB) {
     PB.registerPipelineParsingCallback( &CallBackForPipelineParser);
 }
 
-PassPluginLibraryInfo 
-getRpoPassPluginInfo( void)
-{
+PassPluginLibraryInfo getRpoPassPluginInfo(){
     uint32_t     APIversion =  LLVM_PLUGIN_API_VERSION;
     const char * PluginName =  "RpoPass";
     const char * PluginVersion =  LLVM_VERSION_STRING;
@@ -172,12 +117,7 @@ getRpoPassPluginInfo( void)
     return (info);
 }
 
-/**
- * Интерфейс, который гарантирует, что "opt" распознаст наш проход. 
- * "-passes=MyPass"
- */
-extern "C" LLVM_ATTRIBUTE_WEAK ::llvm::PassPluginLibraryInfo
-llvmGetPassPluginInfo() 
-{
+
+extern "C" LLVM_ATTRIBUTE_WEAK ::llvm::PassPluginLibraryInfo llvmGetPassPluginInfo() {
     return (getRpoPassPluginInfo());
 }
