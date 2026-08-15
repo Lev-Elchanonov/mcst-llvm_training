@@ -1,9 +1,3 @@
-#include <map>
-#include <vector>
-#include <set>
-#include <ostream>
-#include <algorithm>
-
 #include "llvm/Passes/PassBuilder.h"
 #include "llvm/Plugins/PassPlugin.h"
 #include "llvm/Support/raw_ostream.h"
