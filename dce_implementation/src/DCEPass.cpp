@@ -14,7 +14,6 @@ namespace {
         std::vector<Instruction*> DeadInstructions;
         for (auto &BB : Func) {
             for (auto &I : BB) {
-
                 size_t Count = 0;
                 for (auto *U : I.users()) {
                     Count++;
@@ -24,10 +23,11 @@ namespace {
         }
         for (auto &BB : Func) {
             for (auto &I : BB) {
-                // пропускаем инструкции терминаторы или инструкции, имеющие побочные эффекты
+                // пропускаем инструкции терминаторы и инструкции, имеющие побочные эффекты
                 if (I.isTerminator() || I.mayHaveSideEffects()) {
                     continue;
                 }
+                // если нет использований, то помещаем в вектор для удаления
                 if (UseCount[&I] == 0) {
                     DeadInstructions.push_back(&I);
                 }
@@ -48,6 +48,10 @@ namespace {
             outs() << "Before: " << StartAmount << "\n";
             bool CodeChanged = false;
 
+            /**
+             * Алгоритм выполняется пока есть удаленные инструкции, потому что
+             * удаление мертвых инструкций может сделать другие инструкции мертвыми
+             */
             while (EliminateDeadCode(Function)) {
                 CodeChanged = true;
             }

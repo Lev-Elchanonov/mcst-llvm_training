@@ -14,6 +14,21 @@ int loop(int x){
     return 5;
 }
 
+int complex_test_no_deleted(int x){
+    int y = x + 100;
+    int z = 0;
+    if (x > 100){
+        z = 10;
+    } else {
+        z = 50;
+    }
+    int res = 0;
+    while (z > 0) {
+        res += 100;
+        z--;
+    }
+    return x;
+}
 int main(){
     int x = 10;
     int res = x + 100;
