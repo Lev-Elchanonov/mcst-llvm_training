@@ -24,12 +24,8 @@ namespace {
         }
         for (auto &BB : Func) {
             for (auto &I : BB) {
-                // пропускаем инструкции терминаторы
-                if (I.isTerminator()) {
-                    continue;
-                }
-                // пропускаем инструкции с побочными эффектами (вызовы функций, store...)
-                if (I.mayHaveSideEffects()) {
+                // пропускаем инструкции терминаторы или инструкции, имеющие побочные эффекты
+                if (I.isTerminator() || I.mayHaveSideEffects()) {
                     continue;
                 }
                 if (UseCount[&I] == 0) {
@@ -37,15 +33,7 @@ namespace {
                 }
             }
         }
-
         for (auto *I : DeadInstructions) {
-            for (auto &Operand : I->operands()) {
-                if (auto *V = dyn_cast<Value>(Operand)) {
-                    if (UseCount.find(V) != UseCount.end() && UseCount[V] > 0) {
-                        UseCount[V]--;
-                    }
-                }
-            }
             I->eraseFromParent();
             Changed = true;
         }
@@ -64,8 +52,9 @@ namespace {
                 CodeChanged = true;
             }
             size_t EndAmount = Function.getInstructionCount();
-            outs() << "After: " << StartAmount << "\n";
-            outs() << "Deleted instructions count: " << EndAmount - StartAmount << "\b";
+            outs() << "After: " << EndAmount << "\n";
+            auto Difference = StartAmount - EndAmount;
+            outs() << "Deleted instructions count: " << Difference << "\n\n";
             if (CodeChanged) {
                 // Код изменен, а значит анализы нужно пересчитать
                 return PreservedAnalyses::none();
