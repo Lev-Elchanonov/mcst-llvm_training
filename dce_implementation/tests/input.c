@@ -20,6 +20,8 @@ int complex_test_no_deleted(int x){
     if (x > 100){
         z = 10;
     } else {
+        int b = 100;
+        y = b + 5;
         z = 50;
     }
     int res = 0;
