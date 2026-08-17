@@ -7,6 +7,26 @@
 using namespace llvm;
 
 namespace {
+    bool CanRemoveCall(CallInst *CInst){
+        // если результат используется, то удалять нелья
+        if (CInst->getNumUses() != 0){
+            return false;
+        }
+        Function *Callee = CInst->getCalledFunction();
+        if (!Callee){
+            return false;
+        }
+        // проверка что функция не может выкинуть исключения
+        if (!Callee->hasFnAttribute(Attribute::NoUnwind)){
+            return false;
+        }
+        if (Callee->hasFnAttribute(Attribute::ReadNone) ||
+            Callee->hasFnAttribute(Attribute::ReadOnly)) {
+
+            return true;
+        }
+        return false;
+    }
     bool EliminateDeadCode(Function &Func) {
         bool Changed = false;
 
@@ -14,17 +34,22 @@ namespace {
         std::vector<Instruction*> DeadInstructions;
         for (auto &BB : Func) {
             for (auto &I : BB) {
-                size_t Count = 0;
-                for (auto *U : I.users()) {
-                    Count++;
-                }
-                UseCount[&I] = Count;
+                UseCount[&I] = I.getNumUses();
             }
         }
         for (auto &BB : Func) {
             for (auto &I : BB) {
-                // пропускаем инструкции терминаторы и инструкции, имеющие побочные эффекты
-                if (I.isTerminator() || I.mayHaveSideEffects()) {
+                // пропускаем инструкции терминаторы
+                if (I.isTerminator()) {
+                    continue;
+                }
+                if (auto *CInst = dyn_cast<CallInst>(&I)) {
+                    if (CanRemoveCall(CInst)){
+                        DeadInstructions.push_back(CInst);
+                    }
+                }
+                // если есть побочные эффекты
+                if (I.mayHaveSideEffects()){
                     continue;
                 }
                 // если нет использований, то помещаем в вектор для удаления

@@ -33,6 +33,7 @@ int complex_test_no_deleted(int x){
 }
 int main(){
     int x = 10;
+    int nothing = useless(x);
     int res = x + 100;
     int x1 = x;
     int y1 = x1 + x1;
