@@ -25,6 +25,15 @@ namespace {
 
             return true;
         }
+        if (Callee->hasFnAttribute(Attribute::Memory)) {
+            auto MemoryAttr = Callee->getFnAttribute(Attribute::Memory).getValueAsString();
+            if (MemoryAttr == "none" ||
+                MemoryAttr == "readonly" ||
+                MemoryAttr == "read") {
+
+                return true;
+            }
+        }
         return false;
     }
     bool EliminateDeadCode(Function &Func) {
